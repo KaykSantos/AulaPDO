@@ -50,12 +50,13 @@ include('../php/conect.php');
             height: calc(100vh - 70px);
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            /* justify-content: center; */
             align-items: center;
             background-color: rgb(240, 240, 240);
         }
 
         .container{
+            margin: 15px;
             background-color: white;
             width: 550px;
             height: auto;
@@ -70,7 +71,7 @@ include('../php/conect.php');
         }
 
         input{
-            margin: 15px 0px;
+            margin: 10px 0px;
             outline: none;
             border: none;
             border-bottom: 1px solid black;
@@ -88,6 +89,7 @@ include('../php/conect.php');
             letter-spacing: 1px;
             background-color: black;
             color: white;
+            margin: 10px 0px;
         }
 
         p{
@@ -123,8 +125,20 @@ include('../php/conect.php');
         a:hover{
             text-decoration: underline;
         }
-        button{
-            margin: 5px;
+
+        form{
+            margin: 10px 0px;
+            background-color: white;
+            width: 300px;
+            height: auto;
+            padding: 20px 20px;
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            text-align: center;
+            -webkit-box-shadow: 0px 0px 26px -8px rgba(0,0,0,0.75);
+            -moz-box-shadow: 0px 0px 26px -8px rgba(0,0,0,0.75);
+            box-shadow: 0px 0px 26px -8px rgba(0,0,0,0.75);
         }
     </style>
 </head>
@@ -135,6 +149,41 @@ include('../php/conect.php');
     </header>
     <main>
         <?php
+            if($_GET){
+                if(isset($_GET['id'])){
+                    if($_GET['type'] == "delete"){
+                        echo '
+                            <form action="../php/delete.php" method="post">
+                                <h3>Deseja realmente excluir o usuário '.$_GET['id'].'?</h3>
+                                <br>
+                                <input hidden type="text" name="id" value="'.$_GET['id'].'">
+                                <button name="submit-confirm">Confirmar</button><button name="submit-cancel">Cancelar</button>
+                            </form>
+                        ';
+                    }else if($_GET['type'] == "edit"){
+                        $sql = "SELECT * FROM users WHERE cd = :cd";
+                        $stmt = $pdo->prepare($sql);
+                        $stmt->bindParam(':cd', $_GET['id']);
+                        if($stmt->execute()){
+                            foreach($stmt as $row){
+                                echo '
+                                    <form action="../php/edit.php" method="post">
+                                        <h3>Editando dados do usuário '.$row['cd'].'</h3>
+                                        <input hidden type="text" name="cd" value="'.$row['cd'].'">
+                                        <input type="text" name="name" id="name" value="'.$row['name'].'">
+                                     
+                                        <input type="email" name="email" id="email" value="'.$row['email'].'">
+                                        
+                                        <button name="submit-confirm">Editar</button>
+                                        <button name="submit-cancel">Cancelar</button>
+                                    </form>
+                                ';
+                            }
+                        }
+                    }
+                }
+            }
+
             $sql = "SELECT * FROM users";
             $stmt = $pdo->prepare($sql);
             if($stmt->execute()){
@@ -171,42 +220,5 @@ include('../php/conect.php');
             }
         ?>
     </main>
-    
 </body>
 </html>
-<?php
-    if($_GET){
-        if(isset($_GET['id'])){
-            if($_GET['type'] == "delete"){
-                echo '
-                    <form action="../php/delete.php" method="post">
-                        Deseja realmente excluir o usuário '.$_GET['id'].'?
-                        <br>
-                        <input hidden type="text" name="id" value="'.$_GET['id'].'">
-                        <button name="submit-confirm">Confirmar</button><button name="submit-cancel">Cancelar</button>
-                    </form>
-                ';
-            }else if($_GET['type'] == "edit"){
-                $sql = "SELECT * FROM users WHERE cd = :cd";
-                $stmt = $pdo->prepare($sql);
-                $stmt->bindParam(':cd', $_GET['id']);
-                if($stmt->execute()){
-                    foreach($stmt as $row){
-                        echo '
-                            <form action="../php/edit.php" method="post">
-                                Editando dados do usuário '.$row['cd'].'<br>
-                                <input hidden type="text" name="cd" value="'.$row['cd'].'">
-                                <input type="text" name="name" id="name" value="'.$row['name'].'">
-                                <br><br>
-                                <input type="email" name="email" id="email" value="'.$row['email'].'">
-                                <br>
-                                <button name="submit-confirm">Editar</button>
-                                <button name="submit-cancel">Cancelar</button>
-                            </form>
-                        ';
-                    }
-                }
-            }
-        }
-    }
-?>
